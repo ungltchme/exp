@@ -1,0 +1,169 @@
+<html>
+<head>
+    <script src="https://aframe.io/releases/0.4.0/aframe.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="components/orbit-controls.js"></script>
+
+    <title>My first three.js app</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+
+    <script>
+        $.custom = {};
+        $.custom.rotation = 0;
+
+        $(document).ready(function() {
+
+            $("body").click(function() {
+                $.custom.rotation += 0.005;
+            });
+
+
+        });
+    </script>
+
+    <script>
+
+        AFRAME.registerComponent("buffer-geometry", {
+            init: function() {
+
+                $.bufferGeometry = this;
+                var bufferGeometry = new THREE.BufferGeometry();
+
+                var count = new THREE.Vector3(10,10,10);
+                var spacing = new THREE.Vector3(1,1,1);
+
+                var refGeometry = this.createGeometry();
+                var geometrySize = this.getSize(refGeometry);
+
+                var vertices = new Float32Array(refGeometry.faces.length * 9 * count.x*count.y*count.z);
+
+                var vIndex = 0;
+                for ( var ix = 0; ix < count.x; ix ++ ) {
+                    for (var iy = 0; iy < count.y; iy++) {
+                        for (var iz = 0; iz < count.z; iz++) {
+//                            console.log(ix + "|" + iy + "|" + iz);
+
+                            var geometry = this.createGeometry();
+                            geometry.translate(ix*geometrySize.x + spacing.x * ix, iy*geometrySize.y + spacing.y * iy, iz*geometrySize.z + spacing.z * iz);
+
+                            geometry.faces.forEach( function ( face, index ) {
+                                vertices[vIndex] = ( geometry.vertices[ face.a ].x );
+                                vertices[vIndex+1] = ( geometry.vertices[ face.a ].y );
+                                vertices[vIndex+2] = ( geometry.vertices[ face.a ].z );
+                                vertices[vIndex+3] = ( geometry.vertices[ face.b ].x );
+                                vertices[vIndex+4] = ( geometry.vertices[ face.b ].y );
+                                vertices[vIndex+5] = ( geometry.vertices[ face.b ].z );
+                                vertices[vIndex+6] = ( geometry.vertices[ face.c ].x );
+                                vertices[vIndex+7] = ( geometry.vertices[ face.c ].y );
+                                vertices[vIndex+8] = ( geometry.vertices[ face.c ].z );
+                                vIndex += 9;
+                            } );
+
+                        }
+                    }
+                }
+
+                // itemSize = 3 because there are 3 values (components) per vertex
+                bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+                var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+                var mesh = new THREE.Mesh( bufferGeometry, material );
+                this.el.setObject3D("bufferGeometry", mesh);
+
+                bufferGeometry.computeBoundingBox();
+                var boundingSize = this.getSize(bufferGeometry);
+                console.log(boundingSize);
+                var newPos = new THREE.Vector3(-boundingSize.x/2 + geometrySize.x/2, -boundingSize.y/2 + geometrySize.y/2, -boundingSize.z/2 + geometrySize.z/2);
+                this.el.setAttribute("position", newPos);
+            },
+            getSize: function (geometry) {
+              geometry.computeBoundingBox();
+
+              var sizeX = -geometry.boundingBox.min.x + geometry.boundingBox.max.x;
+              var sizeY = -geometry.boundingBox.min.y + geometry.boundingBox.max.y;
+              var sizeZ = -geometry.boundingBox.min.z + geometry.boundingBox.max.z;
+
+              return new THREE.Vector3(sizeX, sizeY, sizeZ);
+            },
+            createGeometry: function () {
+                var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+                return geometry;
+            }
+
+        });
+
+        AFRAME.registerComponent("regular-geometry", {
+            init: function () {
+
+                var count = new THREE.Vector3(10,10,10);
+                var spacing = new THREE.Vector3(1,1,1);
+
+                var refGeometry = this.createGeometry();
+                var geometrySize = this.getSize(refGeometry);
+
+                var vIndex = 0;
+                for ( var ix = 0; ix < count.x; ix ++ ) {
+                    for (var iy = 0; iy < count.y; iy++) {
+                        for (var iz = 0; iz < count.z; iz++) {
+//                            console.log(ix + "|" + iy + "|" + iz);
+
+                            var geometry = this.createGeometry();
+                            geometry.translate(ix*geometrySize.x + spacing.x * ix, iy*geometrySize.y + spacing.y * iy, iz*geometrySize.z + spacing.z * iz);
+
+                            var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+                            var mesh = new THREE.Mesh( geometry, material );
+                            this.el.setObject3D("cube-" + ix + "-" + iy + "-" + iz, mesh);
+                            console.log("cube-" + ix + "-" + iy + "-" + iz);
+
+                        }
+                    }
+                }
+
+            },
+            getSize: function (geometry) {
+                geometry.computeBoundingBox();
+
+                var sizeX = -geometry.boundingBox.min.x + geometry.boundingBox.max.x;
+                var sizeY = -geometry.boundingBox.min.y + geometry.boundingBox.max.y;
+                var sizeZ = -geometry.boundingBox.min.z + geometry.boundingBox.max.z;
+
+                return new THREE.Vector3(sizeX, sizeY, sizeZ);
+            },
+            createGeometry: function () {
+                var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+                return geometry;
+            }
+        });
+
+    </script>
+
+</head>
+<body>
+<a-scene stats>
+    <a-assets></a-assets>
+    <a-entity buffer-geometry></a-entity>
+    <!--<a-entity regular-geometry></a-entity>-->
+    <a-entity geometry="primitive:sphere" scale="0.2 0.2 0.2" id="center" position="0 0 0"></a-entity>
+    <a-sky color="blue"></a-sky>
+
+    <a-entity
+            id="camera"
+            camera
+            position="0 0 5"
+            orbit-controls="
+                autoRotate: false;
+                target: #center;
+                enableDamping: true;
+                dampingFactor: 0.125;
+                rotateSpeed:0.25;
+                minDistance:3;
+                maxDistance:100;"
+            mouse-cursor="">
+        <a-cursor id="cursor"></a-cursor>
+    </a-entity>
+</a-scene>
+
+</body>
+</html>

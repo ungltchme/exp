@@ -33,7 +33,7 @@
                 var bufferGeometry = new THREE.BufferGeometry();
 
                 var count = new THREE.Vector3(30,30,30);
-                var spacing = new THREE.Vector3(1,1,1);
+                var spacing = new THREE.Vector3(1.5,1.5,1.5);
 
                 var refGeometry = this.createGeometry();
                 var geometrySize = this.getSize(refGeometry);
@@ -145,22 +145,23 @@
     <a-assets></a-assets>
     <a-entity buffer-geometry></a-entity>
     <!--<a-entity regular-geometry></a-entity>-->
-    <a-entity geometry="primitive:sphere" scale="0.2 0.2 0.2" id="center" position="0 0 0"></a-entity>
-    <a-sky color="blue"></a-sky>
+    <a-entity geometry="primitive:sphere" scale="0.2 0.2 0.2" id="center" position="0 0 0" visible="false"></a-entity>
+    <a-sky color="black"></a-sky>
 
     <a-entity
             id="camera"
             camera
-            position="0 0 5"
-            orbit-controls="
-                autoRotate: false;
-                target: #center;
-                enableDamping: true;
-                dampingFactor: 0.125;
-                rotateSpeed:0.25;
-                minDistance:3;
-                maxDistance:100;"
-            mouse-cursor="">
+            position="0 0 0"
+            look-controls
+            <!--orbit-controls="-->
+                <!--autoRotate: false;-->
+                <!--target: #center;-->
+                <!--enableDamping: true;-->
+                <!--dampingFactor: 0.125;-->
+                <!--rotateSpeed:0.25;-->
+                <!--minDistance:3;-->
+                <!--maxDistance:100;"-->
+            >
         <a-cursor id="cursor"></a-cursor>
     </a-entity>
 </a-scene>
